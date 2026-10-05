@@ -1,67 +1,64 @@
 import os
+import json
 
-PROJECT_NAME = "GCloudConsoleApp"
+PROJECT = "GCloudConsoleApp"
+APP_NAME = "GCloudConsole"
 BUNDLE_ID = "com.yourname.gcloudconsole"
 URL = "https://console.cloud.google.com/"
 
-os.makedirs(PROJECT_NAME, exist_ok=True)
+os.makedirs(PROJECT, exist_ok=True)
 
-# --- 1) ViewController.swift ---
+# -----------------------------
+# 1) Swift Files
+# -----------------------------
 
-swift_code = f"""
+view_controller = f"""
 import UIKit
 import WebKit
 
 class ViewController: UIViewController {{
-    var webView: WKWebView!
-
     override func viewDidLoad() {{
         super.viewDidLoad()
 
-        let config = WKWebViewConfiguration()
-        webView = WKWebView(frame: view.bounds, configuration: config)
+        let webView = WKWebView(frame: view.bounds)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(webView)
 
-        guard let url = URL(string: "{URL}") else {{
-            return
-        }}
-        let request = URLRequest(url: url)
-        webView.load(request)
+        let url = URL(string: "{URL}")!
+        webView.load(URLRequest(url: url))
     }}
 }}
 """
 
-with open(f"{PROJECT_NAME}/ViewController.swift", "w", encoding="utf-8") as f:
-    f.write(swift_code)
-
-# --- 2) AppDelegate.swift ---
-
-app_delegate = f"""
+app_delegate = """
 import UIKit
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {{
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {{
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         window = UIWindow(frame: UIScreen.main.bounds)
-        let vc = ViewController()
-        window?.rootViewController = vc
+        window?.rootViewController = ViewController()
         window?.makeKeyAndVisible()
 
         return true
-    }}
-}}
+    }
+}
 """
 
-with open(f"{PROJECT_NAME}/AppDelegate.swift", "w", encoding="utf-8") as f:
+with open(f"{PROJECT}/ViewController.swift", "w") as f:
+    f.write(view_controller)
+
+with open(f"{PROJECT}/AppDelegate.swift", "w") as f:
     f.write(app_delegate)
 
-# --- 3) Info.plist ---
+# -----------------------------
+# 2) Info.plist
+# -----------------------------
 
 plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -69,7 +66,7 @@ plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>GCloud Console</string>
+    <string>{APP_NAME}</string>
     <key>CFBundleIdentifier</key>
     <string>{BUNDLE_ID}</string>
     <key>CFBundleVersion</key>
@@ -78,10 +75,6 @@ plist = f"""<?xml version="1.0" encoding="UTF-8"?>
     <string>1.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>UIRequiresFullScreen</key>
-    <true/>
-    <key>UIStatusBarHidden</key>
-    <false/>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>
@@ -91,15 +84,43 @@ plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 </plist>
 """
 
-with open(f"{PROJECT_NAME}/Info.plist", "w", encoding="utf-8") as f:
+with open(f"{PROJECT}/Info.plist", "w") as f:
     f.write(plist)
 
-# --- 4) إضافة ملف الأيقونة داخل المشروع ---
+# -----------------------------
+# 3) Xcode Project Structure
+# -----------------------------
 
-icon_path = f"{PROJECT_NAME}/IMG_9964.png"
-if not os.path.exists(icon_path):
-    with open(icon_path, "wb") as f:
-        f.write(b"")  # ملف فارغ كتنبيه — ضع الأيقونة الحقيقية هنا
+xcodeproj = {
+    "project": {
+        "name": APP_NAME,
+        "bundle_id": BUNDLE_ID,
+        "sources": [
+            "AppDelegate.swift",
+            "ViewController.swift"
+        ],
+        "plist": "Info.plist"
+    }
+}
 
-print("✅ تم إنشاء مشروع iOS WebView لموقع Google Cloud Console")
-print("📌 ضع ملف IMG_9964.png الحقيقي داخل مجلد:", PROJECT_NAME)
+with open(f"{PROJECT}/project.json", "w") as f:
+    json.dump(xcodeproj, f, indent=4)
+
+# -----------------------------
+# 4) Build Script (No Xcode)
+# -----------------------------
+
+build_script = """
+#!/bin/bash
+ios-build-tools build project.json --output GCloudConsole.ipa
+"""
+
+with open(f"{PROJECT}/build.sh", "w") as f:
+    f.write(build_script)
+
+os.chmod(f"{PROJECT}/build.sh", 0o755)
+
+print("✅ تم إنشاء مشروع iOS كامل")
+print("📦 لتجميعه إلى IPA:")
+print("1) ثبت ios-build-tools")
+print("2) شغّل: ./build.sh")
