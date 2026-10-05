@@ -1,12 +1,12 @@
 import os
 
 PROJECT_NAME = "GCloudConsoleApp"
-BUNDLE_ID = "com.yourname.gcloudconsole"  # عدّلها لو حاب
+BUNDLE_ID = "com.yourname.gcloudconsole"
 URL = "https://console.cloud.google.com/"
 
 os.makedirs(PROJECT_NAME, exist_ok=True)
 
-# --- 1) ملف ViewController.swift ---
+# --- 1) ViewController.swift ---
 
 swift_code = f"""
 import UIKit
@@ -35,7 +35,7 @@ class ViewController: UIViewController {{
 with open(f"{PROJECT_NAME}/ViewController.swift", "w", encoding="utf-8") as f:
     f.write(swift_code)
 
-# --- 2) ملف AppDelegate.swift بسيط ---
+# --- 2) AppDelegate.swift ---
 
 app_delegate = f"""
 import UIKit
@@ -61,7 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {{
 with open(f"{PROJECT_NAME}/AppDelegate.swift", "w", encoding="utf-8") as f:
     f.write(app_delegate)
 
-# --- 3) ملف Info.plist ---
+# --- 3) Info.plist ---
 
 plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -78,8 +78,6 @@ plist = f"""<?xml version="1.0" encoding="UTF-8"?>
     <string>1.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>UILaunchStoryboardName</key>
-    <string></string>
     <key>UIRequiresFullScreen</key>
     <true/>
     <key>UIStatusBarHidden</key>
@@ -96,5 +94,12 @@ plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 with open(f"{PROJECT_NAME}/Info.plist", "w", encoding="utf-8") as f:
     f.write(plist)
 
-print("✅ تم إنشاء مشروع iOS WebView لموقع Google Cloud Console داخل المجلد:", PROJECT_NAME)
-print("ضع هذه الملفات داخل مشروع Xcode أو استخدم أداة لبناء IPA من المشروع.")
+# --- 4) إضافة ملف الأيقونة داخل المشروع ---
+
+icon_path = f"{PROJECT_NAME}/IMG_9964.png"
+if not os.path.exists(icon_path):
+    with open(icon_path, "wb") as f:
+        f.write(b"")  # ملف فارغ كتنبيه — ضع الأيقونة الحقيقية هنا
+
+print("✅ تم إنشاء مشروع iOS WebView لموقع Google Cloud Console")
+print("📌 ضع ملف IMG_9964.png الحقيقي داخل مجلد:", PROJECT_NAME)
