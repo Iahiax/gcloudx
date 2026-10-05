@@ -1,6 +1,6 @@
 import os
 
-project = "MetronyApp"
+project = "gcloud"
 os.makedirs(project, exist_ok=True)
 
 # Swift WebView code
